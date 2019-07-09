@@ -5,7 +5,7 @@ General description of the code changes in the pull request.
 If any bugs were fixed, please describe them. If the bugs relate to existing issues, 
 please tag them.
 
-See [contributing guidelines](https://github.com/radekg/terraform-provisioner-ansible/blob/master/CONTRIBUTING.md) for more details.
+See [contributing guidelines](https://github.com/alexkreidler/terraform-provisioner-ansible/blob/master/CONTRIBUTING.md) for more details.
 
 ### Other Information
 

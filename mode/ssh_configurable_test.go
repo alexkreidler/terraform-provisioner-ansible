@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/radekg/terraform-provisioner-ansible/test"
+	"github.com/alexkreidler/terraform-provisioner-ansible/test"
 )
 
 type testingSSHConfigurable struct {

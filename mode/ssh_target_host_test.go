@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/radekg/terraform-provisioner-ansible/test"
+	"github.com/alexkreidler/terraform-provisioner-ansible/test"
 )
 
 func TestTargetHostConfiguration(t *testing.T) {

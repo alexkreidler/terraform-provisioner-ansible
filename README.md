@@ -63,7 +63,7 @@ $ docker run -it --rm -v $PWD:$PWD -w $PWD radekg/terraform-ansible:latest apply
 
 Note that although `terraform-provisioner-ansible` is in the [terraform registry](https://registry.terraform.io/modules/radekg/ansible/provisioner/), it cannot be installed using a `module` terraform stanza, as such a configuration will not cause terraform to download the `terraform-provisioner-ansible` binary.
 
-[Prebuilt releases are available on GitHub](https://github.com/radekg/terraform-provisioner-ansible/releases). Download a release for the version you require and place it in `~/.terraform.d/plugins` directory, as [documented here](https://www.terraform.io/docs/plugins/basics.html).
+[Prebuilt releases are available on GitHub](https://github.com/alexkreidler/terraform-provisioner-ansible/releases). Download a release for the version you require and place it in `~/.terraform.d/plugins` directory, as [documented here](https://www.terraform.io/docs/plugins/basics.html).
 
 **Caution: you will need to rename the file to match the pattern recognized by Terraform: `terraform-provisioner-ansible_v<version>`.**
 
@@ -283,7 +283,7 @@ The existence of this resource enables `remote provisioning`. To use remote prov
 
 ## Examples
 
-[Working examples](https://github.com/radekg/terraform-provisioner-ansible/tree/master/examples).
+[Working examples](https://github.com/alexkreidler/terraform-provisioner-ansible/tree/master/examples).
 
 ## Usage
 
@@ -508,9 +508,9 @@ make test-verbose
 - added `--diff` support
 - added `--vault_id` support
 - added `ansible_ssh_settings {}` resource instead of magic environment variables
-- remote provisioner: use a custom Ansible installer: https://github.com/radekg/terraform-provisioner-ansible/issues/76
-- remote provisioner: use a custom remote directory for the Ansible installer: https://github.com/radekg/terraform-provisioner-ansible/issues/78
-- remote provisioner: use a custom bootstrap directory for Ansible data: https://github.com/radekg/terraform-provisioner-ansible/issues/79
+- remote provisioner: use a custom Ansible installer: https://github.com/alexkreidler/terraform-provisioner-ansible/issues/76
+- remote provisioner: use a custom remote directory for the Ansible installer: https://github.com/alexkreidler/terraform-provisioner-ansible/issues/78
+- remote provisioner: use a custom bootstrap directory for Ansible data: https://github.com/alexkreidler/terraform-provisioner-ansible/issues/79
 - support `connection.host_key` and `connection.bastion_host_key`
 
 ## Creating releases
@@ -519,7 +519,7 @@ To cut a release, run:
 
     curl -sL https://raw.githubusercontent.com/radekg/git-release/master/git-release --output /tmp/git-release
     chmod +x /tmp/git-release
-    /tmp/git-release --repository-path=$GOPATH/src/github.com/radekg/terraform-provisioner-ansible
+    /tmp/git-release --repository-path=$GOPATH/src/github.com/alexkreidler/terraform-provisioner-ansible
     rm -rf /tmp/git-release
 
 After the release is cut, build the binaries for the release:

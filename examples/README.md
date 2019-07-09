@@ -1,12 +1,12 @@
 # Ansible provisioner for Terraform - examples
 
-This repository contains [Ansible provisioner for Terraform](https://github.com/radekg/terraform-provisioner-ansible) examples.
+This repository contains [Ansible provisioner for Terraform](https://github.com/alexkreidler/terraform-provisioner-ansible) examples.
 
 Provided examples use AWS `eu-central-1`. The operating system is CentOS 7.
 
 ## Getting started
 
-1. [Install the provisioner](https://github.com/radekg/terraform-provisioner-ansible#installation)
+1. [Install the provisioner](https://github.com/alexkreidler/terraform-provisioner-ansible#installation)
 2. Create a key pair:
     
     ```

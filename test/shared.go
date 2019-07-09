@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/radekg/terraform-provisioner-ansible/types"
+	"github.com/alexkreidler/terraform-provisioner-ansible/types"
 )
 
 var (

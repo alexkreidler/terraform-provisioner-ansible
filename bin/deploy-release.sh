@@ -25,17 +25,17 @@ EOF
   exit 1
 }
 
-while getopts ":hav:" optname ; do
+while getopts ":hav:" optname; do
   case "$optname" in
-    h)
-      show_help
-      ;;
-    a)
-      architecture="$OPTARG"
-      ;;
-    v)
-      version="$OPTARG"
-      ;;
+  h)
+    show_help
+    ;;
+  a)
+    architecture="$OPTARG"
+    ;;
+  v)
+    version="$OPTARG"
+    ;;
   esac
 done
 
@@ -45,19 +45,22 @@ if [ "${version}" == "not-set" ]; then
 fi
 
 case "$OSTYPE" in
-  # release does not necessarily exist for a given OS
-  darwin*)  ostype=darwin ;; 
-  linux*)   ostype=linux ;;
-  msys*)    ostype=linux ;;
-  freebsd*) ostype=freebsd ;;
-  *)        echo "unknown: $OSTYPE." >&2; exit 2 ;;
+# release does not necessarily exist for a given OS
+darwin*) ostype=darwin ;;
+linux*) ostype=linux ;;
+msys*) ostype=linux ;;
+freebsd*) ostype=freebsd ;;
+*)
+  echo "unknown: $OSTYPE." >&2
+  exit 2
+  ;;
 esac
 
-download_url="https://github.com/radekg/terraform-provisioner-ansible/releases/download/v${version}/terraform-provisioner-ansible-${ostype}-${architecture}_v${version}"
+download_url="https://github.com/alexkreidler/terraform-provisioner-ansible/releases/download/v${version}/terraform-provisioner-ansible-${ostype}-${architecture}_v${version}"
 
 # GitHub stores files under a different URL, thus it redirects, we are looking for 302:
 echo "Checking existence of ${download_url}..."
-status=`curl -sSI HEAD "${download_url}" | grep 'Status:' | awk '{ print $2 }'`
+status=$(curl -sSI HEAD "${download_url}" | grep 'Status:' | awk '{ print $2 }')
 
 if [ "$status" != "302" ]; then
   echo "Error: no release available for ${ostype}, version ${version}\n\tat ${download_url}" >&2
