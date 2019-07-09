@@ -1,16 +1,16 @@
-#!/usr/bin/env sh
+#!/usr/bin/env sh -x
 set -euo pipefail
-base="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+base="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "${base}/env.sh"
 
 version_file="${base}/../.version"
 
-version=`cat ${version_file} | head -n1`
+version=$(cat ${version_file} | head -n1)
 
 local_output_dir="${base}/.build_output"
 docker_output_dir=/output
 docker_gopath="/golang"
-project=`echo $(dirname "$base") | sed -e 's!'$GOPATH'!!'`
+project=$(echo $(dirname "$base") | sed -e 's!'$GOPATH'!!')
 
 rm -rf "${local_output_dir}"
 mkdir -p "${local_output_dir}"
