@@ -32,6 +32,7 @@ type Play struct {
 	overrideInventoryFile     string
 	overrideVaultID           []string
 	overrideVaultPasswordFile string
+	additionalContent         string
 }
 
 const (
@@ -62,6 +63,7 @@ const (
 	playAttributeVaultID           = "vault_id"
 	playAttributeVaultPasswordFile = "vault_password_file"
 	playAttributeVerbose           = "verbose"
+	playAttributeAdditionalContent = "inventory_append"
 )
 
 // NewPlaySchema returns a new play schema.
@@ -147,6 +149,10 @@ func NewPlaySchema() *schema.Schema {
 					Type:     schema.TypeBool,
 					Optional: true,
 				},
+				playAttributeAdditionalContent: &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
 			},
 		},
 	}
@@ -175,6 +181,7 @@ func NewPlayFromMapInterface(vals map[string]interface{}, defaults *Defaults) *P
 		vaultID:           listOfInterfaceToListOfString(vals[playAttributeVaultID].([]interface{})),
 		vaultPasswordFile: vals[playAttributeVaultPasswordFile].(string),
 		verbose:           vals[playAttributeVerbose].(bool),
+		additionalContent: vals[playAttributeAdditionalContent].(string),
 	}
 
 	emptySet := "*Set(map[string]interface {}(nil))"
@@ -343,6 +350,11 @@ func (v *Play) VaultID() []string {
 // Verbose represents Ansible --verbose flag.
 func (v *Play) Verbose() bool {
 	return v.verbose
+}
+
+// AdditionalContent represents additional text to append to the inventory file
+func (v *Play) AdditionalContent() string {
+	return v.additionalContent
 }
 
 // SetOverrideInventoryFile is used by the provisioner in the following cases:
@@ -523,7 +535,7 @@ func (v *Play) toCommandArguments(ansibleArgs LocalModeAnsibleArgs, ansibleSSHSe
 	sshExtraAgrsOptions = append(sshExtraAgrsOptions, fmt.Sprintf("-p %d", ansibleArgs.Port))
 	sshExtraAgrsOptions = append(sshExtraAgrsOptions, fmt.Sprintf("-o ConnectTimeout=%d", ansibleSSHSettings.ConnectTimeoutSeconds()))
 	sshExtraAgrsOptions = append(sshExtraAgrsOptions, fmt.Sprintf("-o ConnectionAttempts=%d", ansibleSSHSettings.ConnectAttempts()))
-	
+
 	if ansibleSSHSettings.InsecureNoStrictHostKeyChecking() || v.InventoryFile() != "" {
 		sshExtraAgrsOptions = append(sshExtraAgrsOptions, "-o StrictHostKeyChecking=no")
 	} else {
@@ -540,7 +552,7 @@ func (v *Play) toCommandArguments(ansibleArgs LocalModeAnsibleArgs, ansibleSSHSe
 		if ansibleArgs.BastionPemFile != "" {
 			proxyCommand = fmt.Sprintf("%s -i %s", proxyCommand, ansibleArgs.BastionPemFile)
 		}
-		if ansibleSSHSettings.InsecureBastionNoStrictHostKeyChecking()  {
+		if ansibleSSHSettings.InsecureBastionNoStrictHostKeyChecking() {
 			proxyCommand = fmt.Sprintf("%s -o StrictHostKeyChecking=no", proxyCommand)
 		} else {
 			if ansibleSSHSettings.BastionUserKnownHostsFile() != "" {

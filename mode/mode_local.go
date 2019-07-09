@@ -30,6 +30,7 @@ type inventoryTemplateLocalDataHost struct {
 type inventoryTemplateLocalData struct {
 	Hosts  []inventoryTemplateLocalDataHost
 	Groups []string
+	AdditionalContent string
 }
 
 const inventoryTemplateLocal = `{{$top := . -}}
@@ -51,7 +52,9 @@ const inventoryTemplateLocal = `{{$top := . -}}
 {{printf "\n" -}}
 {{end}}
 
-{{end}}`
+{{end}}
+
+{{.AdditionalContent}}`
 
 // NewLocalMode returns configured local mode provisioner.
 func NewLocalMode(o terraform.UIOutput, s *terraform.InstanceState) (*LocalMode, error) {
@@ -326,6 +329,7 @@ func (v *LocalMode) writeInventory(play *types.Play) (string, error) {
 		templateData := inventoryTemplateLocalData{
 			Hosts:  make([]inventoryTemplateLocalDataHost, 0),
 			Groups: play.Groups(),
+			AdditionalContent: play.AdditionalContent(),
 		}
 
         // Compute resource path
