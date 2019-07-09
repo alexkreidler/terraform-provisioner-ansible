@@ -33,6 +33,7 @@ type Play struct {
 	overrideVaultID           []string
 	overrideVaultPasswordFile string
 	additionalContent         string
+	generatedInventoryDir     string
 }
 
 const (
@@ -46,24 +47,25 @@ const (
 	ansibleEnvVarDefaultRolesPath = "DEFAULT_ROLES_PATH"
 	ansibleEnvVarRemoteTmp        = "ANSIBLE_REMOTE_TMP"
 	// attribute names:
-	playAttributeEnabled           = "enabled"
-	playAttributePlaybook          = "playbook"
-	playAttributeModule            = "module"
-	playAttributeHosts             = "hosts"
-	playAttributeGroups            = "groups"
-	playAttributeBecome            = "become"
-	playAttributeBecomeMethod      = "become_method"
-	playAttributeBecomeUser        = "become_user"
-	playAttributeDiff              = "diff"
-	playAttributeCheck             = "check"
-	playAttributeExtraVars         = "extra_vars"
-	playAttributeForks             = "forks"
-	playAttributeInventoryFile     = "inventory_file"
-	playAttributeLimit             = "limit"
-	playAttributeVaultID           = "vault_id"
-	playAttributeVaultPasswordFile = "vault_password_file"
-	playAttributeVerbose           = "verbose"
-	playAttributeAdditionalContent = "inventory_append"
+	playAttributeEnabled              = "enabled"
+	playAttributePlaybook             = "playbook"
+	playAttributeModule               = "module"
+	playAttributeHosts                = "hosts"
+	playAttributeGroups               = "groups"
+	playAttributeBecome               = "become"
+	playAttributeBecomeMethod         = "become_method"
+	playAttributeBecomeUser           = "become_user"
+	playAttributeDiff                 = "diff"
+	playAttributeCheck                = "check"
+	playAttributeExtraVars            = "extra_vars"
+	playAttributeForks                = "forks"
+	playAttributeInventoryFile        = "inventory_file"
+	playAttributeLimit                = "limit"
+	playAttributeVaultID              = "vault_id"
+	playAttributeVaultPasswordFile    = "vault_password_file"
+	playAttributeVerbose              = "verbose"
+	playAttributeAdditionalContent    = "inventory_append"
+	playAttributeGneratedInventoryDir = "gen_dir"
 )
 
 // NewPlaySchema returns a new play schema.
@@ -153,6 +155,10 @@ func NewPlaySchema() *schema.Schema {
 					Type:     schema.TypeString,
 					Optional: true,
 				},
+				playAttributeGneratedInventoryDir: &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
 			},
 		},
 	}
@@ -167,21 +173,22 @@ func NewPlayFromInterface(i interface{}, defaults *Defaults) *Play {
 // NewPlayFromMapInterface reads Play configuration from a map.
 func NewPlayFromMapInterface(vals map[string]interface{}, defaults *Defaults) *Play {
 	v := &Play{
-		defaults:          defaults,
-		enabled:           vals[playAttributeEnabled].(bool),
-		become:            vals[playAttributeBecome].(bool),
-		becomeMethod:      vals[playAttributeBecomeMethod].(string),
-		becomeUser:        vals[playAttributeBecomeUser].(string),
-		diff:              vals[playAttributeDiff].(bool),
-		check:             vals[playAttributeCheck].(bool),
-		extraVars:         mapFromTypeMap(vals[playAttributeExtraVars]),
-		forks:             vals[playAttributeForks].(int),
-		inventoryFile:     vals[playAttributeInventoryFile].(string),
-		limit:             vals[playAttributeLimit].(string),
-		vaultID:           listOfInterfaceToListOfString(vals[playAttributeVaultID].([]interface{})),
-		vaultPasswordFile: vals[playAttributeVaultPasswordFile].(string),
-		verbose:           vals[playAttributeVerbose].(bool),
-		additionalContent: vals[playAttributeAdditionalContent].(string),
+		defaults:              defaults,
+		enabled:               vals[playAttributeEnabled].(bool),
+		become:                vals[playAttributeBecome].(bool),
+		becomeMethod:          vals[playAttributeBecomeMethod].(string),
+		becomeUser:            vals[playAttributeBecomeUser].(string),
+		diff:                  vals[playAttributeDiff].(bool),
+		check:                 vals[playAttributeCheck].(bool),
+		extraVars:             mapFromTypeMap(vals[playAttributeExtraVars]),
+		forks:                 vals[playAttributeForks].(int),
+		inventoryFile:         vals[playAttributeInventoryFile].(string),
+		limit:                 vals[playAttributeLimit].(string),
+		vaultID:               listOfInterfaceToListOfString(vals[playAttributeVaultID].([]interface{})),
+		vaultPasswordFile:     vals[playAttributeVaultPasswordFile].(string),
+		verbose:               vals[playAttributeVerbose].(bool),
+		additionalContent:     vals[playAttributeAdditionalContent].(string),
+		generatedInventoryDir: vals[playAttributeGneratedInventoryDir].(string),
 	}
 
 	emptySet := "*Set(map[string]interface {}(nil))"
@@ -355,6 +362,11 @@ func (v *Play) Verbose() bool {
 // AdditionalContent represents additional text to append to the inventory file
 func (v *Play) AdditionalContent() string {
 	return v.additionalContent
+}
+
+// GeneratedInventoryDir represents the directory in which to place the auto-generated inventory file
+func (v *Play) GeneratedInventoryDir() string {
+	return v.generatedInventoryDir
 }
 
 // SetOverrideInventoryFile is used by the provisioner in the following cases:

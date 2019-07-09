@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 	"text/template"
 	"time"
@@ -28,8 +29,8 @@ type inventoryTemplateLocalDataHost struct {
 }
 
 type inventoryTemplateLocalData struct {
-	Hosts  []inventoryTemplateLocalDataHost
-	Groups []string
+	Hosts             []inventoryTemplateLocalDataHost
+	Groups            []string
 	AdditionalContent string
 }
 
@@ -73,7 +74,7 @@ func NewLocalMode(o terraform.UIOutput, s *terraform.InstanceState) (*LocalMode,
 
 	// Checks on connInfo unnecessary
 	// connInfo.User defaulted to "root" by Terraform
-	// connInfo.Host always populated when running under compute resource. 
+	// connInfo.Host always populated when running under compute resource.
 
 	return &LocalMode{
 		o:        o,
@@ -89,21 +90,20 @@ func (v *LocalMode) ComputeResource() bool {
 	}
 }
 
-
 // Run executes local provisioning process.
 func (v *LocalMode) Run(plays []*types.Play, ansibleSSHSettings *types.AnsibleSSHSettings) error {
 
 	// Validate config for null_resource
 	compute_resource := v.ComputeResource()
-	if !compute_resource  {
+	if !compute_resource {
 		for _, play := range plays {
 			if len(play.Hosts()) == 0 && play.InventoryFile() == "" {
 				return fmt.Errorf("Hosts or Inventory file must be specified on each plays attribute when using null_resource")
 			}
-		}	
+		}
 		// Force StrictHostKeyChecking=no for null_resource
-		ansibleSSHSettings.SetOverrideStrictHostKeyChecking()					
-	}		
+		ansibleSSHSettings.SetOverrideStrictHostKeyChecking()
+	}
 
 	bastionPemFile := ""
 	if v.connInfo.BastionPrivateKey != "" {
@@ -179,7 +179,7 @@ func (v *LocalMode) Run(plays []*types.Play, ansibleSSHSettings *types.AnsibleSS
 		knownHostsBastion = append(knownHostsBastion, fmt.Sprintf("%s %s", bastion.host(), bastion.hostKey()))
 	} else {
 		if !ansibleSSHSettings.InsecureNoStrictHostKeyChecking() {
-			v.o.Output(fmt.Sprintf("InsecureNoStrictHostKeyChecking false" ))
+			v.o.Output(fmt.Sprintf("InsecureNoStrictHostKeyChecking false"))
 			if compute_resource {
 				if ansibleSSHSettings.UserKnownHostsFile() == "" {
 					if target.hostKey() == "" {
@@ -190,7 +190,6 @@ func (v *LocalMode) Run(plays []*types.Play, ansibleSSHSettings *types.AnsibleSS
 						timeoutMs := ansibleSSHSettings.SSHKeyscanSeconds() * 1000
 						timeSpentMs := 0
 						intervalMs := 5000
-
 
 						for {
 							if err := target.fetchHostKey(); err != nil {
@@ -294,7 +293,7 @@ func (v *LocalMode) writeKnownHosts(knownHosts []string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	v.o.Output(fmt.Sprintf("Write known hosts %s\n", knownHostsFileContents) )
+	v.o.Output(fmt.Sprintf("Write known hosts %s\n", knownHostsFileContents))
 	if err := ioutil.WriteFile(file.Name(), []byte(fmt.Sprintf("%s\n", knownHostsFileContents)), 0644); err != nil {
 		return "", err
 	}
@@ -323,16 +322,15 @@ func (v *LocalMode) writePem(pk string) (string, error) {
 func (v *LocalMode) writeInventory(play *types.Play) (string, error) {
 	if play.InventoryFile() == "" {
 
-
 		playHosts := play.Hosts()
 
 		templateData := inventoryTemplateLocalData{
-			Hosts:  make([]inventoryTemplateLocalDataHost, 0),
-			Groups: play.Groups(),
+			Hosts:             make([]inventoryTemplateLocalDataHost, 0),
+			Groups:            play.Groups(),
 			AdditionalContent: play.AdditionalContent(),
 		}
 
-        // Compute resource path
+		// Compute resource path
 		if v.connInfo.Host != "" {
 			if len(playHosts) > 0 {
 				if playHosts[0] != "" {
@@ -349,14 +347,14 @@ func (v *LocalMode) writeInventory(play *types.Play) (string, error) {
 				templateData.Hosts = append(templateData.Hosts, inventoryTemplateLocalDataHost{
 					Alias: v.connInfo.Host,
 				})
-			}	
+			}
 		} else {
 			// Path for null resource, which does not use v.connInfo.Host
 			for _, host := range playHosts {
 				if host != "" {
 					templateData.Hosts = append(templateData.Hosts, inventoryTemplateLocalDataHost{
-							Alias: host,
-						})
+						Alias: host,
+					})
 				}
 			}
 
@@ -370,13 +368,20 @@ func (v *LocalMode) writeInventory(play *types.Play) (string, error) {
 			return "", fmt.Errorf("Error executing 'hosts' template: %s", err)
 		}
 
-		file, err := ioutil.TempFile(os.TempDir(), "temporary-ansible-inventory")
+		var file *os.File
+		dir := play.GeneratedInventoryDir()
+		if dir != "" {
+			p := path.Join(dir, "inventory-autogen.ini")
+			file, err = os.OpenFile(p, os.O_RDONLY|os.O_CREATE, 0666)
+		} else {
+			file, err = ioutil.TempFile(os.TempDir(), "temporary-ansible-inventory")
+		}
 		defer file.Close()
 		if err != nil {
 			return "", err
 		}
 
-		v.o.Output(fmt.Sprintf("Writing temporary ansible inventory to '%s'...", file.Name()))
+		v.o.Output(fmt.Sprintf("Writing ansible inventory to '%s'...", file.Name()))
 		if err := ioutil.WriteFile(file.Name(), buf.Bytes(), 0644); err != nil {
 			return "", err
 		}
